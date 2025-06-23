@@ -2,6 +2,13 @@ from fastapi import FastAPI, Request
 
 app = FastAPI()
 
+# Função para converter texto em número com segurança
+def safe_float(value):
+    try:
+        return float(str(value).replace(",", "."))
+    except:
+        return 0.0
+
 @app.post("/analyze_project/")
 async def analyze_project(request: Request):
     body = await request.json()
@@ -9,8 +16,8 @@ async def analyze_project(request: Request):
     # Pega os dados do corpo da requisição
     project_name = body.get("projectName", "Projeto sem nome")
     status = body.get("status", "Desconhecido")
-    physical = float(body.get("physicalProgress", 0))
-    financial = float(body.get("financialProgress", 0))
+    physical = safe_float(body.get("physicalProgress", 0))
+    financial = safe_float(body.get("financialProgress", 0))
     risks = body.get("hasRisks", "Não")
     notes = body.get("notes", "")
 
