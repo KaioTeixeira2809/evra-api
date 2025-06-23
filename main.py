@@ -48,4 +48,3 @@ async def analyze_project(request: Request):
     # Resposta final formatada como texto simples
     full_response = f"✅ Análise concluída!\n\n{analysis.strip()}\n\n{recommendation.strip()}"
     return full_response
-
