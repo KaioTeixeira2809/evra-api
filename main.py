@@ -45,8 +45,7 @@ async def analyze_project(request: Request):
     else:
         recommendation += "Recomenda-se revisar o plano de ação e reforçar a comunicação entre as áreas envolvidas. "
 
-    # Resposta final
-    return {
-        "resumo": analysis.strip(),
-        "recomendacao": recommendation.strip()
-    }
+    # Resposta final formatada como texto simples
+    full_response = f"✅ Análise concluída!\n\n{analysis.strip()}\n\n{recommendation.strip()}"
+    return full_response
+
