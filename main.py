@@ -22,6 +22,7 @@ class ProjectData(BaseModel):
 
 @app.post("/analyze_project/")
 def analyze_project(data: ProjectData):
+    print(data)
     projectName = data.projectName
     status = data.status
     physical = data.physicalProgress
