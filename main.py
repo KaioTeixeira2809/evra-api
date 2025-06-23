@@ -1,16 +1,24 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from typing import Union
 
 app = FastAPI()
 
 class ProjectData(BaseModel):
     projectName: str
     status: str
-    physicalProgress: float
-    financialProgress: float
+    physicalProgress: Union[float, str]
+    financialProgress: Union[float, str]
     hasRisks: str
     riskDescription: str
     notes: str
+
+    @validator("physicalProgress", "financialProgress", pre=True)
+    def convert_to_float(cls, v):
+        try:
+            return float(v)
+        except ValueError:
+            raise ValueError("Os campos de progresso devem ser números ou strings numéricas.")
 
 @app.post("/analyze_project/")
 def analyze_project(data: ProjectData):
@@ -53,3 +61,4 @@ Observações: {notes}
 """
 
     return {"summary": summary}
+
