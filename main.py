@@ -52,4 +52,6 @@ async def analyze_project(request: Request):
         )
 
     full_response = f"✅ Análise concluída!\n\n{analysis.strip()}\n\nℹ️ {explanation}\n\n{recommendation.strip()}"
-    return full_response
+    
+    # Retorna como JSON com chave 'analysis'
+    return {"analysis": full_response}
