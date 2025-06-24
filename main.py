@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request
 
 app = FastAPI()
 
-# Função para converter texto em número com segurança
 def safe_float(value):
     try:
         return float(str(value).replace(",", "."))
@@ -13,7 +12,6 @@ def safe_float(value):
 async def analyze_project(request: Request):
     body = await request.json()
 
-    # Pega os dados do corpo da requisição
     project_name = body.get("projectName", "Projeto sem nome")
     status = body.get("status", "Desconhecido")
     physical = safe_float(body.get("physicalProgress", 0))
@@ -21,9 +19,8 @@ async def analyze_project(request: Request):
     risks = body.get("hasRisks", "Não")
     notes = body.get("notes", "")
 
-    # Análise
-    analysis = f"O projeto **{project_name}** está atualmente com status **{status}**. "
-    analysis += f"O avanço físico é de **{physical}%** e o financeiro é de **{financial}%**. "
+    analysis = f"O projeto {project_name} está atualmente com status {status}. "
+    analysis += f"O avanço físico é de {physical}% e o financeiro é de {financial}%. "
 
     if physical < financial:
         analysis += "Há um possível excesso de gastos em relação ao progresso físico. "
@@ -36,10 +33,10 @@ async def analyze_project(request: Request):
         explanation = "Isso sugere que o projeto está seguindo o cronograma e orçamento conforme o planejado."
 
     if risks.lower() == "sim":
-        analysis += f"⚠️ Foi identificado um risco: *{notes}*. "
+        analysis += f"⚠️ Foi identificado um risco: {notes}. "
         analysis += "Isso pode impactar o cronograma e o orçamento do projeto. "
 
-    recommendation = "✅ **Recomendação:** "
+    recommendation = "✅ Recomendação: "
     if "equipamento" in notes.lower() or "logística" in notes.lower():
         recommendation += (
             "A equipe responsável pela entrega de equipamentos deve considerar realocar o tempo ocioso para outras frentes do projeto, como planejamento ou testes. "
@@ -52,6 +49,4 @@ async def analyze_project(request: Request):
         )
 
     full_response = f"✅ Análise concluída!\n\n{analysis.strip()}\n\nℹ️ {explanation}\n\n{recommendation.strip()}"
-    
-    # Retorna como string simples
     return full_response
