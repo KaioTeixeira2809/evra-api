@@ -25,7 +25,6 @@ async def analyze_project(request: Request):
     analysis = f"O projeto **{project_name}** está atualmente com status **{status}**. "
     analysis += f"O avanço físico é de **{physical}%** e o financeiro é de **{financial}%**. "
 
-    # Interpretação
     if physical < financial:
         analysis += "Há um possível excesso de gastos em relação ao progresso físico. "
         explanation = "Isso indica que o projeto pode estar gastando mais do que deveria para o nível de execução atual."
@@ -36,12 +35,10 @@ async def analyze_project(request: Request):
         analysis += "O avanço físico e financeiro estão equilibrados. "
         explanation = "Isso sugere que o projeto está seguindo o cronograma e orçamento conforme o planejado."
 
-    # Riscos
     if risks.lower() == "sim":
         analysis += f"⚠️ Foi identificado um risco: *{notes}*. "
         analysis += "Isso pode impactar o cronograma e o orçamento do projeto. "
 
-    # Recomendação com explicação
     recommendation = "✅ **Recomendação:** "
     if "equipamento" in notes.lower() or "logística" in notes.lower():
         recommendation += (
@@ -54,7 +51,5 @@ async def analyze_project(request: Request):
             "Essa medida ajuda a mitigar riscos e alinhar expectativas entre os times."
         )
 
-    # Resposta final formatada
     full_response = f"✅ Análise concluída!\n\n{analysis.strip()}\n\nℹ️ {explanation}\n\n{recommendation.strip()}"
     return full_response
-
