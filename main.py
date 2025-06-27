@@ -1,75 +1,33 @@
-from fastapi import FastAPI, Request
-from uuid import uuid4
+from fastapi import FastAPI
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI()
 
-# Armazenamento em memória
-project_db = {}
+# Modelo de entrada para o endpoint de texto livre
+class FreeformInput(BaseModel):
+    description: str
 
-def safe_float(value):
-    try:
-        return float(str(value).replace(",", "."))
-    except:
-        return 0.0
+# Função que interpreta a descrição do projeto
+def interpretar_descricao(texto: str) -> str:
+    # Aqui você pode usar NLP ou regex para extrair dados reais
+    # Por enquanto, vamos simular uma análise simples
+    linhas = texto.strip().split("\n")
+    resposta = ["📊 Análise do Projeto com base na descrição recebida:\n"]
 
-@app.post("/submit_project/")
-async def submit_project(request: Request):
-    body = await request.json()
+    for linha in linhas:
+        if linha.strip():
+            resposta.append(f"• {linha.strip()}")
 
-    project_id = str(uuid4())
-    project_db[project_id] = {
-        "projectName": body.get("projectName", "Projeto sem nome"),
-        "status": body.get("status", "Desconhecido"),
-        "physicalProgress": safe_float(body.get("physicalProgress", 0)),
-        "financialProgress": safe_float(body.get("financialProgress", 0)),
-        "hasRisks": body.get("hasRisks", "Não"),
-        "notes": body.get("notes", "")
-    }
+    resposta.append("\n✅ Recomendação: Monitorar riscos e revisar cronograma.")
+    return "\n".join(resposta)
 
-    return {"projectId": project_id}
+# Endpoint que recebe a descrição e retorna a análise
+@app.post("/analyze_freeform/")
+def analyze_freeform(data: FreeformInput):
+    analysis = interpretar_descricao(data.description)
+    return analysis
 
-@app.get("/analyze_project/{project_id}")
-async def analyze_project(project_id: str):
-    project = project_db.get(project_id)
-
-    if not project:
-        return {"error": "Projeto não encontrado."}
-
-    name = project["projectName"]
-    status = project["status"]
-    physical = project["physicalProgress"]
-    financial = project["financialProgress"]
-    risks = project["hasRisks"]
-    notes = project["notes"]
-
-    analysis = f"O projeto {name} está atualmente com status {status}. "
-    analysis += f"O avanço físico é de {physical}% e o financeiro é de {financial}%. "
-
-    if physical < financial:
-        analysis += "Há um possível excesso de gastos em relação ao progresso físico. "
-        explanation = "Isso indica que o projeto pode estar gastando mais do que deveria para o nível de execução atual."
-    elif financial < physical:
-        analysis += "O projeto está avançando fisicamente mais rápido do que o orçamento está sendo executado. "
-        explanation = "Isso pode indicar eficiência na execução ou atraso nos repasses financeiros."
-    else:
-        analysis += "O avanço físico e financeiro estão equilibrados. "
-        explanation = "Isso sugere que o projeto está seguindo o cronograma e orçamento conforme o planejado."
-
-    if risks.lower() == "sim":
-        analysis += f"⚠️ Foi identificado um risco: {notes}. "
-        analysis += "Isso pode impactar o cronograma e o orçamento do projeto. "
-
-    recommendation = "✅ Recomendação: "
-    if "equipamento" in notes.lower() or "logística" in notes.lower() or "suprimentos" in notes.lower():
-        recommendation += (
-            "A equipe responsável pela entrega de equipamentos deve considerar realocar o tempo ocioso para outras frentes do projeto, como planejamento ou testes. "
-            "Essa recomendação visa evitar desperdício de tempo e manter o ritmo de avanço em outras áreas enquanto o problema logístico é resolvido."
-        )
-    else:
-        recommendation += (
-            "Recomenda-se revisar o plano de ação e reforçar a comunicação entre as áreas envolvidas. "
-            "Essa medida ajuda a mitigar riscos e alinhar expectativas entre os times."
-        )
-
-    full_response = f"✅ Análise concluída!\n\n{analysis.strip()}\n\nℹ️ {explanation}\n\n{recommendation.strip()}"
-    return full_response
+# Para rodar localmente (opcional)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
